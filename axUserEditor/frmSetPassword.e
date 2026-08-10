@@ -30,8 +30,8 @@ PROC okbuttonPressed() OF frmSetPassword
   GetA4()
   
   //check both password boxes match
-  get(self.app.strPassword1, MUIA_Text_Contents,{entry1})
-  get(self.app.strPassword2, MUIA_Text_Contents,{entry2})
+  get(self.app.strPassword1, MUIA_String_Contents,{entry1})
+  get(self.app.strPassword2, MUIA_String_Contents,{entry2})
 
   IF StrLen(entry1)=0
     set ( self.winMain,MUIA_Window_ActiveObject,self.app.strPassword1)
@@ -63,14 +63,14 @@ PROC setPassword(newPassword:PTR TO CHAR) OF frmSetPassword
   self.setupButtonClick(self.app.btnPwdOk,self.btnOkClickHook,{okbuttonPressed})
   self.setupButtonClick(self.app.btnPwdCancel,self.btnCancelClickHook,{cancelbuttonPressed})
 
-  set(self.app.strPassword1, MUIA_Text_Contents,'')
-  set(self.app.strPassword2, MUIA_Text_Contents,'')
+  set(self.app.strPassword1, MUIA_String_Contents,'')
+  set(self.app.strPassword2, MUIA_String_Contents,'')
   set(self.app.strPassword1, MUIA_ShortHelp , getHelpText(HLP_SET_PASSWORD_1))
   set(self.app.strPassword2, MUIA_ShortHelp , getHelpText(HLP_SET_PASSWORD_2))
 
   res:=self.showModal()
   IF res
-    get(self.app.strPassword1, MUIA_Text_Contents,{tempval})
+    get(self.app.strPassword1, MUIA_String_Contents,{tempval})
     StrCopy(newPassword,tempval)
   ENDIF
   

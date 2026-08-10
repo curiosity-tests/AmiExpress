@@ -342,7 +342,7 @@ PROC setpasswordbuttonpressed() OF frmEditUser
       CASE PWD_PBKDF2_10000
         StrCopy(tempstring,'PBKDF2(10000)')
     ENDSELECT
-    set( self.app.strPwdType, MUIA_Text_Contents,tempstring)
+    set( self.app.strPwdType, MUIA_String_Contents,tempstring)
 
     self.unsavedChanges:=TRUE
   ENDIF
@@ -467,47 +467,47 @@ ENDPROC
 PROC newUser() OF frmEditUser
   DEF i,cb:PTR TO confBase
 
-  set( self.app.strUsername, MUIA_Text_Contents,'')
+  set( self.app.strUsername, MUIA_String_Contents,'')
 
   set( self.app.cyActive, MUIA_Cycle_Active,0)
-  set( self.app.strRealname, MUIA_Text_Contents,'')
-  set( self.app.strInternetName, MUIA_Text_Contents,'')
-  set( self.app.strEmailAddress, MUIA_Text_Contents,'')
-  set( self.app.strPassword, MUIA_Text_Contents,'')
-  set( self.app.strLocation, MUIA_Text_Contents,'')
-  set( self.app.strPhone, MUIA_Text_Contents,'')
+  set( self.app.strRealname, MUIA_String_Contents,'')
+  set( self.app.strInternetName, MUIA_String_Contents,'')
+  set( self.app.strEmailAddress, MUIA_String_Contents,'')
+  set( self.app.strPassword, MUIA_String_Contents,'')
+  set( self.app.strLocation, MUIA_String_Contents,'')
+  set( self.app.strPhone, MUIA_String_Contents,'')
   set( self.app.cyRejoinConf, MUIA_Cycle_Active,0)
   set( self.app.cySecArea, MUIA_Cycle_Active,0)
   set( self.app.slSecLevel, MUIA_Slider_Level,0)
-  set( self.app.strRatio, MUIA_Text_Contents,'')
+  set( self.app.strRatio, MUIA_String_Contents,'')
   set( self.app.cyRatioType, MUIA_Cycle_Active,0)
-  set( self.app.strUploads, MUIA_Text_Contents,'0')  
-  set( self.app.strDownloads, MUIA_Text_Contents,'0')
-  set( self.app.strDownloadBytes, MUIA_Text_Contents,'0')
-  set( self.app.strUploadBytes, MUIA_Text_Contents,'0')
-  set( self.app.strMessages, MUIA_Text_Contents,'0')
+  set( self.app.strUploads, MUIA_String_Contents,'0')  
+  set( self.app.strDownloads, MUIA_String_Contents,'0')
+  set( self.app.strDownloadBytes, MUIA_String_Contents,'0')
+  set( self.app.strUploadBytes, MUIA_String_Contents,'0')
+  set( self.app.strMessages, MUIA_String_Contents,'0')
     
-  set( self.app.strUploadCPS, MUIA_Text_Contents,'0')
+  set( self.app.strUploadCPS, MUIA_String_Contents,'0')
 
-  set( self.app.strDownloadCPS, MUIA_Text_Contents,'0')
+  set( self.app.strDownloadCPS, MUIA_String_Contents,'0')
     
-  set( self.app.strByteLimit, MUIA_Text_Contents,'0')
+  set( self.app.strByteLimit, MUIA_String_Contents,'0')
 
-  set( self.app.strTimeTotal, MUIA_Text_Contents,'0')
+  set( self.app.strTimeTotal, MUIA_String_Contents,'0')
 
-  set( self.app.strTimeLimit, MUIA_Text_Contents,'0')
+  set( self.app.strTimeLimit, MUIA_String_Contents,'0')
 
-  set( self.app.strChatLimit, MUIA_Text_Contents,'0')
+  set( self.app.strChatLimit, MUIA_String_Contents,'0')
 
-  set( self.app.strTimeUsed, MUIA_Text_Contents,'0')
+  set( self.app.strTimeUsed, MUIA_String_Contents,'0')
 
-  set( self.app.strChatUsed, MUIA_Text_Contents,'0')
+  set( self.app.strChatUsed, MUIA_String_Contents,'0')
 
   set( self.app.cyPwdReset, MUIA_Cycle_Active,1)
 
   set( self.app.cyAccountLocked, MUIA_Cycle_Active,1)
 
-  set( self.app.strInvalidAttempts, MUIA_Text_Contents,'0')
+  set( self.app.strInvalidAttempts, MUIA_String_Contents,'0')
 
   set( self.app.cyNewUser,MUIA_Cycle_Active,0)
 
@@ -515,23 +515,23 @@ PROC newUser() OF frmEditUser
 
   set( self.app.cyScreens, MUIA_Cycle_Active,0)
 
-  set( self.app.strTotalCalls, MUIA_Text_Contents,'0')
+  set( self.app.strTotalCalls, MUIA_String_Contents,'0')
 
-  set( self.app.strPwdType, MUIA_Text_Contents,'N/A')
+  set( self.app.strPwdType, MUIA_String_Contents,'N/A')
 
-  set( self.app.strCallsToday, MUIA_Text_Contents,'0')
+  set( self.app.strCallsToday, MUIA_String_Contents,'0')
 
-  set( self.app.strLastCalled, MUIA_Text_Contents,'')
+  set( self.app.strLastCalled, MUIA_String_Contents,'')
 
-  set( self.app.strLastPwdReset, MUIA_Text_Contents,'')
+  set( self.app.strLastPwdReset, MUIA_String_Contents,'')
 
-  set( self.app.strCbRatio, MUIA_Text_Contents,'')
+  set( self.app.strCbRatio, MUIA_String_Contents,'')
   set( self.app.cyCbRatioType, MUIA_Cycle_Active,0)
-  set( self.app.strCbUploads, MUIA_Text_Contents,'0')  
-  set( self.app.strCbDownloads, MUIA_Text_Contents,'0')
-  set( self.app.strCbDownloadBytes, MUIA_Text_Contents,'0')
-  set( self.app.strCbUploadBytes, MUIA_Text_Contents,'0')
-  set( self.app.strCbMessages, MUIA_Text_Contents,'0')
+  set( self.app.strCbUploads, MUIA_String_Contents,'0')  
+  set( self.app.strCbDownloads, MUIA_String_Contents,'0')
+  set( self.app.strCbDownloadBytes, MUIA_String_Contents,'0')
+  set( self.app.strCbUploadBytes, MUIA_String_Contents,'0')
+  set( self.app.strCbMessages, MUIA_String_Contents,'0')
   
   set ( self.app.cyCbConf,MUIA_Cycle_Active,0)
   self.currConf:=0
@@ -654,6 +654,7 @@ PROC loadBBSSetup() OF frmEditUser
     FOR i:=1 TO count
       StringF(toolname,'LOCATION.\d',i)
       readToolType(toolTypeFile,toolname,toolTypeFile2)
+        IF toolTypeFile2[EstrLen(toolTypeFile2)-1]="/" THEN SetStr(toolTypeFile2,EstrLen(toolTypeFile2)-1)
       StrAdd(toolTypeFile2,'Msgbases')
       count2:=readToolTypeInt(toolTypeFile2,'NMSGBASES')
 
@@ -664,12 +665,16 @@ PROC loadBBSSetup() OF frmEditUser
         readToolType(toolTypeFile,toolname,tempstring)
         self.confNameList[v]:=StrClone(tempstring)
 
-        StringF(toolTypeFile2,'\sConf\d',self.bbsPath,i)
+        StringF(toolname,'LOCATION.\d',i)
+        readToolType(toolTypeFile,toolname,toolTypeFile2)
+
+        IF toolTypeFile2[EstrLen(toolTypeFile2)-1]="/" THEN SetStr(toolTypeFile2,EstrLen(toolTypeFile2)-1)
         StringF(toolname,'CONFDB_SHARED')
         n:=readToolTypeInt(toolTypeFile2,toolname)
         IF n<=0
           StringF(toolname,'LOCATION.\d',i)
           readToolType(toolTypeFile,toolname,tempstring)
+           IF Not(tempstring[EstrLen(tempstring)-1]==["/",":"]) THEN StrAdd(tempstring,'/')
           StrAdd(tempstring,'Conf.DB')
           self.confDbList[i-1]:=StrClone(tempstring)
         ELSE
@@ -828,18 +833,19 @@ PROC loadUser(userId) OF frmEditUser
   userId--
 
   IF result>3
+
     CopyMem(self.confDbEntries,self.editedConfDbEntries,SIZEOF confBase*self.confCount)
 
     AstrCopy(self.selectUser,self.userData.name,80)
     set( self.app.txtSelectUserName, MUIA_Text_Contents,self.selectUser)
-    set( self.app.strUsername, MUIA_Text_Contents,self.userData.name)
+    set( self.app.strUsername, MUIA_String_Contents,self.userData.name)
     set( self.app.cyActive, MUIA_Cycle_Active,IF self.userData.slotNumber=0 THEN 1 ELSE 0)
-    set( self.app.strRealname, MUIA_Text_Contents,self.userMisc.realName)
-    set( self.app.strInternetName, MUIA_Text_Contents,self.userMisc.internetName)
-    set( self.app.strEmailAddress, MUIA_Text_Contents,self.userMisc.eMail)
-    set( self.app.strPassword, MUIA_Text_Contents,'1234567890')
-    set( self.app.strLocation, MUIA_Text_Contents,self.userData.location)
-    set( self.app.strPhone, MUIA_Text_Contents,self.userData.phoneNumber)
+    set( self.app.strRealname, MUIA_String_Contents,self.userMisc.realName)
+    set( self.app.strInternetName, MUIA_String_Contents,self.userMisc.internetName)
+    set( self.app.strEmailAddress, MUIA_String_Contents,self.userMisc.eMail)
+    set( self.app.strPassword, MUIA_String_Contents,'1234567890')
+    set( self.app.strLocation, MUIA_String_Contents,self.userData.location)
+    set( self.app.strPhone, MUIA_String_Contents,self.userData.phoneNumber)
     set( self.app.cyRejoinConf, MUIA_Cycle_Active,self.calculateConfIndex(self.userData.confRJoin,self.userData.msgBaseRJoin))
 
     i:=0
@@ -850,61 +856,61 @@ PROC loadUser(userId) OF frmEditUser
     
     set( self.app.slSecLevel, MUIA_Slider_Level,self.userData.secStatus)
     StringF(tempstring,'\d',self.userData.secLibrary)
-    set( self.app.strRatio, MUIA_Text_Contents,tempstring)
+    set( self.app.strRatio, MUIA_String_Contents,tempstring)
 
     set( self.app.cyRatioType, MUIA_Cycle_Active,self.userData.secBoard)
     StringF(tempstring,'\d',self.userData.uploads)
-    set( self.app.strUploads, MUIA_Text_Contents,tempstring)
+    set( self.app.strUploads, MUIA_String_Contents,tempstring)
     
     StringF(tempstring,'\d',self.userData.downloads)
-    set( self.app.strDownloads, MUIA_Text_Contents,tempstring)
+    set( self.app.strDownloads, MUIA_String_Contents,tempstring)
 
     IF self.userData.bytesDownload=-1
       formatBCD(self.userMisc.downloadBytesBCD,tempstring)
     ELSE
       StringF(tempstring,'\d',self.userData.bytesDownload)
     ENDIF
-    set( self.app.strDownloadBytes, MUIA_Text_Contents,tempstring)
+    set( self.app.strDownloadBytes, MUIA_String_Contents,tempstring)
 
     IF self.userData.bytesUpload=-1
       formatBCD(self.userMisc.uploadBytesBCD,tempstring)
     ELSE
       StringF(tempstring,'\d',self.userData.bytesUpload)
     ENDIF
-    set( self.app.strUploadBytes, MUIA_Text_Contents,tempstring)
+    set( self.app.strUploadBytes, MUIA_String_Contents,tempstring)
 
     StringF(tempstring,'\d',self.userData.messagesPosted)
-    set( self.app.strMessages, MUIA_Text_Contents,tempstring)
+    set( self.app.strMessages, MUIA_String_Contents,tempstring)
     
     StringF(tempstring,'\d',self.userKeys.upCPS2)
-    set( self.app.strUploadCPS, MUIA_Text_Contents,tempstring)
+    set( self.app.strUploadCPS, MUIA_String_Contents,tempstring)
 
     StringF(tempstring,'\d',self.userKeys.dnCPS2)
-    set( self.app.strDownloadCPS, MUIA_Text_Contents,tempstring)
+    set( self.app.strDownloadCPS, MUIA_String_Contents,tempstring)
     
     StringF(tempstring,'\d',self.userData.dailyBytesLimit)
-    set( self.app.strByteLimit, MUIA_Text_Contents,tempstring)
+    set( self.app.strByteLimit, MUIA_String_Contents,tempstring)
 
     StringF(tempstring,'\d',self.userData.timeTotal)
-    set( self.app.strTimeTotal, MUIA_Text_Contents,tempstring)
+    set( self.app.strTimeTotal, MUIA_String_Contents,tempstring)
 
     StringF(tempstring,'\d',self.userData.timeLimit)
-    set( self.app.strTimeLimit, MUIA_Text_Contents,tempstring)
+    set( self.app.strTimeLimit, MUIA_String_Contents,tempstring)
 
     StringF(tempstring,'\d',self.userData.chatLimit)
-    set( self.app.strChatLimit, MUIA_Text_Contents,tempstring)
+    set( self.app.strChatLimit, MUIA_String_Contents,tempstring)
 
     StringF(tempstring,'\d',self.userData.timeUsed)
-    set( self.app.strTimeUsed, MUIA_Text_Contents,tempstring)
+    set( self.app.strTimeUsed, MUIA_String_Contents,tempstring)
 
     StringF(tempstring,'\d',self.userData.chatLimit-self.userData.chatRemain)
-    set( self.app.strChatUsed, MUIA_Text_Contents,tempstring)
+    set( self.app.strChatUsed, MUIA_String_Contents,tempstring)
 
     set( self.app.cyPwdReset, MUIA_Cycle_Active,IF self.userMisc.forcePwdReset=0 THEN 1 ELSE 0)
     set( self.app.cyAccountLocked, MUIA_Cycle_Active,IF self.userMisc.accountLocked=0 THEN 1 ELSE 0)
 
     StringF(tempstring,'\d',self.userMisc.invalidAttempts)
-    set( self.app.strInvalidAttempts, MUIA_Text_Contents,tempstring)
+    set( self.app.strInvalidAttempts, MUIA_String_Contents,tempstring)
 
     set( self.app.cyNewUser, MUIA_Cycle_Active,IF self.userData.newUser=0 THEN 1 ELSE 0)
  
@@ -913,7 +919,7 @@ PROC loadUser(userId) OF frmEditUser
     set( self.app.cyScreens, MUIA_Cycle_Active,self.userData.screenType)
 
     StringF(tempstring,'\d',self.userData.timesCalled)
-    set( self.app.strTotalCalls, MUIA_Text_Contents,tempstring)
+    set( self.app.strTotalCalls, MUIA_String_Contents,tempstring)
 
     SELECT self.userMisc.pwdType
       CASE PWD_LEGACY
@@ -929,16 +935,16 @@ PROC loadUser(userId) OF frmEditUser
       CASE PWD_PBKDF2_10000
         StrCopy(tempstring,'PBKDF2(10000)')
     ENDSELECT
-    set( self.app.strPwdType, MUIA_Text_Contents,tempstring)
+    set( self.app.strPwdType, MUIA_String_Contents,tempstring)
 
     StringF(tempstring,'\d',self.userKeys.timesOnToday)
-    set( self.app.strCallsToday, MUIA_Text_Contents,tempstring)
+    set( self.app.strCallsToday, MUIA_String_Contents,tempstring)
 
     formatLongDateTime(self.userData.timeLastOn,tempstring)
-    set( self.app.strLastCalled, MUIA_Text_Contents,tempstring)
+    set( self.app.strLastCalled, MUIA_String_Contents,tempstring)
 
     formatLongDateTime(self.userMisc.pwdLastUpdated,tempstring)
-    set( self.app.strLastPwdReset, MUIA_Text_Contents,tempstring)
+    set( self.app.strLastPwdReset, MUIA_String_Contents,tempstring)
 
   ENDIF
 
@@ -947,7 +953,6 @@ PROC loadUser(userId) OF frmEditUser
   self.loadConfBase(TRUE)
 
   self.unsavedChanges:=FALSE
-  
 ENDPROC
 
 PROC showControlError(control,page,errorText:PTR TO CHAR) OF frmEditUser
@@ -960,7 +965,7 @@ PROC validateNumber(control) OF frmEditUser
   DEF tempstr[200]:STRING
   DEF i,tempval:PTR TO CHAR
   
-  get(control, MUIA_Text_Contents,{tempval})
+  get(control, MUIA_String_Contents,{tempval})
   fullTrim(tempval,tempstr)
   
   FOR i:=0 TO EstrLen(tempstr)-1
@@ -991,7 +996,7 @@ ENDPROC dupe
 PROC validateSettings() OF frmEditUser
   DEF tempval,r,l
   
-  get(self.app.strUsername, MUIA_Text_Contents,{tempval})
+  get(self.app.strUsername, MUIA_String_Contents,{tempval})
   IF StrLen(tempval)=0
     self.showControlError(self.app.strUsername,0,'UserName cannot be blank.')
     RETURN FALSE
@@ -1101,60 +1106,60 @@ PROC saveCurrentConfBase() OF frmEditUser
 
   editedConfBase:=self.editedConfDbEntries+(SIZEOF confBase*self.currConf)
  
-  get(self.app.strCbDownloadBytes, MUIA_Text_Contents,{tempval})
+  get(self.app.strCbDownloadBytes, MUIA_String_Contents,{tempval})
   bcdVal(tempval,diffBCD)
   subBCD2(diffBCD,editedConfBase.downloadBytesBCD)
 
   bcdVal(tempval,editedConfBase.downloadBytesBCD)
   editedConfBase.bytesDownload:=convertFromBCD(editedConfBase.downloadBytesBCD)
-  get(self.app.strDownloadBytes, MUIA_Text_Contents,{tempval})
+  get(self.app.strDownloadBytes, MUIA_String_Contents,{tempval})
   bcdVal(tempval,tempvalBCD)
   addBCD2(tempvalBCD,diffBCD)
   formatBCD(tempvalBCD,tempstr)
-  set(self.app.strDownloadBytes, MUIA_Text_Contents,tempstr)
+  set(self.app.strDownloadBytes, MUIA_String_Contents,tempstr)
   
 
-  get(self.app.strCbUploadBytes, MUIA_Text_Contents,{tempval})
+  get(self.app.strCbUploadBytes, MUIA_String_Contents,{tempval})
   bcdVal(tempval,diffBCD)
   subBCD2(diffBCD,editedConfBase.uploadBytesBCD)
 
   bcdVal(tempval,editedConfBase.uploadBytesBCD)
   editedConfBase.bytesUpload:=convertFromBCD(editedConfBase.uploadBytesBCD)
-  get(self.app.strUploadBytes, MUIA_Text_Contents,{tempval})
+  get(self.app.strUploadBytes, MUIA_String_Contents,{tempval})
   bcdVal(tempval,tempvalBCD)
   addBCD2(tempvalBCD,diffBCD)
   formatBCD(tempvalBCD,tempstr)
-  set(self.app.strUploadBytes, MUIA_Text_Contents,tempstr)
+  set(self.app.strUploadBytes, MUIA_String_Contents,tempstr)
 
-  get(self.app.strCbUploads, MUIA_Text_Contents,{tempval})
+  get(self.app.strCbUploads, MUIA_String_Contents,{tempval})
   diff:=Val(tempval)-editedConfBase.upload
   editedConfBase.upload:=Val(tempval)
-  get(self.app.strUploads, MUIA_Text_Contents,{tempval})
+  get(self.app.strUploads, MUIA_String_Contents,{tempval})
   diff+=Val(tempval)
   StringF(tempstr,'\d',diff)
-  set(self.app.strUploads, MUIA_Text_Contents,tempstr)
+  set(self.app.strUploads, MUIA_String_Contents,tempstr)
 
-  get(self.app.strCbDownloads, MUIA_Text_Contents,{tempval})
+  get(self.app.strCbDownloads, MUIA_String_Contents,{tempval})
   diff:=Val(tempval)-editedConfBase.downloads
   editedConfBase.downloads:=Val(tempval)
-  get(self.app.strDownloads, MUIA_Text_Contents,{tempval})
+  get(self.app.strDownloads, MUIA_String_Contents,{tempval})
   diff+=Val(tempval)
   StringF(tempstr,'\d',diff)
-  set(self.app.strDownloads, MUIA_Text_Contents,tempstr)
+  set(self.app.strDownloads, MUIA_String_Contents,tempstr)
 
-  get(self.app.strCbRatio, MUIA_Text_Contents,{tempval})
+  get(self.app.strCbRatio, MUIA_String_Contents,{tempval})
   editedConfBase.ratio:=Val(tempval)
       
   get(self.app.cyCbRatioType, MUIA_Cycle_Active,{tempval})
   editedConfBase.ratioType:=tempval
 
-  get(self.app.strCbMessages, MUIA_Text_Contents,{tempval})
+  get(self.app.strCbMessages, MUIA_String_Contents,{tempval})
   diff:=Val(tempval)-editedConfBase.messagesPosted
   editedConfBase.messagesPosted:=Val(tempval)
-  get(self.app.strMessages, MUIA_Text_Contents,{tempval})
+  get(self.app.strMessages, MUIA_String_Contents,{tempval})
   diff+=Val(tempval)
   StringF(tempstr,'\d',diff)
-  set(self.app.strMessages, MUIA_Text_Contents,tempstr)
+  set(self.app.strMessages, MUIA_String_Contents,tempstr)
 ENDPROC
 
 PROC loadConfBase(firstTime) OF frmEditUser
@@ -1176,26 +1181,26 @@ PROC loadConfBase(firstTime) OF frmEditUser
   ELSE
     StringF(tempstring,'\d',editedConfBase.bytesDownload)
   ENDIF
-  set( self.app.strCbDownloadBytes, MUIA_Text_Contents,tempstring)
+  set( self.app.strCbDownloadBytes, MUIA_String_Contents,tempstring)
 
   IF editedConfBase.bytesUpload=-1
     formatBCD(editedConfBase.uploadBytesBCD,tempstring)
   ELSE
     StringF(tempstring,'\d',editedConfBase.bytesUpload)
   ENDIF
-  set( self.app.strCbUploadBytes, MUIA_Text_Contents,tempstring)
+  set( self.app.strCbUploadBytes, MUIA_String_Contents,tempstring)
 
   StringF(tempstring,'\d',editedConfBase.upload)
-  set( self.app.strCbUploads, MUIA_Text_Contents,tempstring)
+  set( self.app.strCbUploads, MUIA_String_Contents,tempstring)
 
   StringF(tempstring,'\d',editedConfBase.downloads)
-  set( self.app.strCbDownloads, MUIA_Text_Contents,tempstring)
+  set( self.app.strCbDownloads, MUIA_String_Contents,tempstring)
 
   StringF(tempstring,'\d',editedConfBase.ratio)
-  set( self.app.strCbRatio, MUIA_Text_Contents,tempstring)
+  set( self.app.strCbRatio, MUIA_String_Contents,tempstring)
    
   StringF(tempstring,'\d',editedConfBase.messagesPosted)
-  set( self.app.strCbMessages, MUIA_Text_Contents,tempstring)
+  set( self.app.strCbMessages, MUIA_String_Contents,tempstring)
 
   set(self.app.cyCbRatioType, MUIA_Cycle_Active,editedConfBase.ratioType)
 
@@ -1261,7 +1266,7 @@ PROC saveUser(userId) OF frmEditUser
 
   self.loadUserData(userId)
   
-  get(self.app.strUsername, MUIA_Text_Contents,{tempval})
+  get(self.app.strUsername, MUIA_String_Contents,{tempval})
   
   IF StrCmp(oldUserData.name,tempval)=FALSE
     AstrCopy(self.userData.name,tempval,ARRAYSIZE oldUserData.name)
@@ -1282,27 +1287,27 @@ PROC saveUser(userId) OF frmEditUser
     self.userKeys.number:=IF tempval=1 THEN 0 ELSE userId
   ENDIF
 
-  get(self.app.strRealname, MUIA_Text_Contents,{tempval})
+  get(self.app.strRealname, MUIA_String_Contents,{tempval})
   IF StrCmp(oldUserMisc.realName,tempval)=FALSE
     AstrCopy(self.userMisc.realName,tempval,ARRAYSIZE oldUserMisc.realName)
   ENDIF
    
-  get(self.app.strInternetName, MUIA_Text_Contents,{tempval})
+  get(self.app.strInternetName, MUIA_String_Contents,{tempval})
   IF StrCmp(oldUserMisc.internetName,tempval)=FALSE
     AstrCopy(self.userMisc.internetName,tempval,ARRAYSIZE oldUserMisc.internetName)
   ENDIF
 
-  get(self.app.strEmailAddress, MUIA_Text_Contents,{tempval})
+  get(self.app.strEmailAddress, MUIA_String_Contents,{tempval})
   IF StrCmp(oldUserMisc.eMail,tempval)=FALSE
     AstrCopy(self.userMisc.eMail,tempval,ARRAYSIZE oldUserMisc.eMail)
   ENDIF
 
-  get(self.app.strLocation, MUIA_Text_Contents,{tempval})
+  get(self.app.strLocation, MUIA_String_Contents,{tempval})
   IF StrCmp(oldUserData.location,tempval)=FALSE
     AstrCopy(self.userData.location,tempval,ARRAYSIZE oldUserData.location)
   ENDIF
   
-  get(self.app.strPhone, MUIA_Text_Contents,{tempval})
+  get(self.app.strPhone, MUIA_String_Contents,{tempval})
   IF StrCmp(oldUserData.phoneNumber,tempval)=FALSE
     AstrCopy(self.userData.phoneNumber,tempval,ARRAYSIZE oldUserData.phoneNumber)
   ENDIF
@@ -1324,7 +1329,7 @@ PROC saveUser(userId) OF frmEditUser
     self.userData.secStatus:=tempval
   ENDIF
 
-  get(self.app.strRatio, MUIA_Text_Contents,{tempval})
+  get(self.app.strRatio, MUIA_String_Contents,{tempval})
   IF oldUserData.secLibrary<>Val(tempval)
     self.userData.secLibrary:=Val(tempval)
   ENDIF
@@ -1334,71 +1339,71 @@ PROC saveUser(userId) OF frmEditUser
     self.userData.secBoard:=tempval
   ENDIF
 
-  get(self.app.strUploads, MUIA_Text_Contents,{tempval})
+  get(self.app.strUploads, MUIA_String_Contents,{tempval})
   IF oldUserData.uploads<>Val(tempval)
     self.userData.uploads:=Val(tempval)
   ENDIF
 
-  get(self.app.strDownloads, MUIA_Text_Contents,{tempval})
+  get(self.app.strDownloads, MUIA_String_Contents,{tempval})
   IF oldUserData.downloads<>Val(tempval)
     self.userData.downloads:=Val(tempval)
   ENDIF
 
-  get(self.app.strDownloadBytes, MUIA_Text_Contents,{tempval})
+  get(self.app.strDownloadBytes, MUIA_String_Contents,{tempval})
   formatBCD(oldUserMisc.downloadBytesBCD,tempstring)
   IF StrCmp(tempstring,tempval)=FALSE 
     bcdVal(tempval,self.userMisc.downloadBytesBCD)
     self.userData.bytesDownload:=convertFromBCD(self.userMisc.downloadBytesBCD)
   ENDIF
 
-  get(self.app.strUploadBytes, MUIA_Text_Contents,{tempval})
+  get(self.app.strUploadBytes, MUIA_String_Contents,{tempval})
   formatBCD(oldUserMisc.uploadBytesBCD,tempstring)
   IF StrCmp(tempstring,tempval)=FALSE
     bcdVal(tempval,self.userMisc.uploadBytesBCD)
     self.userData.bytesUpload:=convertFromBCD(self.userMisc.uploadBytesBCD)
   ENDIF
 
-  get(self.app.strMessages, MUIA_Text_Contents,{tempval})
+  get(self.app.strMessages, MUIA_String_Contents,{tempval})
   IF oldUserData.messagesPosted<>Val(tempval)
     self.userData.messagesPosted:=Val(tempval)
   ENDIF
 
-  get(self.app.strUploadCPS, MUIA_Text_Contents,{tempval})
+  get(self.app.strUploadCPS, MUIA_String_Contents,{tempval})
   IF oldUserKeys.upCPS2<>Val(tempval)
     self.userKeys.upCPS2:=Val(tempval)
   ENDIF
 
-  get(self.app.strDownloadCPS, MUIA_Text_Contents,{tempval})
+  get(self.app.strDownloadCPS, MUIA_String_Contents,{tempval})
   IF oldUserKeys.dnCPS2<>Val(tempval)
     self.userKeys.dnCPS2:=Val(tempval)
   ENDIF
   
-  get(self.app.strByteLimit, MUIA_Text_Contents,{tempval})
+  get(self.app.strByteLimit, MUIA_String_Contents,{tempval})
   IF oldUserData.dailyBytesLimit<>Val(tempval)
     self.userData.dailyBytesLimit:=Val(tempval)
   ENDIF
 
-  get(self.app.strTimeTotal, MUIA_Text_Contents,{tempval})
+  get(self.app.strTimeTotal, MUIA_String_Contents,{tempval})
   IF oldUserData.timeTotal<>Val(tempval)
     self.userData.timeTotal:=Val(tempval)
   ENDIF
 
-  get(self.app.strTimeLimit, MUIA_Text_Contents,{tempval})
+  get(self.app.strTimeLimit, MUIA_String_Contents,{tempval})
   IF oldUserData.timeLimit<>Val(tempval)
     self.userData.timeLimit:=Val(tempval)
   ENDIF
   
-  get(self.app.strChatLimit, MUIA_Text_Contents,{tempval})
+  get(self.app.strChatLimit, MUIA_String_Contents,{tempval})
   IF oldUserData.chatLimit<>Val(tempval)
     self.userData.chatLimit:=Val(tempval)
   ENDIF
 
-  get(self.app.strTimeUsed, MUIA_Text_Contents,{tempval})
+  get(self.app.strTimeUsed, MUIA_String_Contents,{tempval})
   IF oldUserData.timeUsed<>Val(tempval)
     self.userData.timeUsed:=Val(tempval)
   ENDIF
 
-  get(self.app.strChatUsed, MUIA_Text_Contents,{tempval})
+  get(self.app.strChatUsed, MUIA_String_Contents,{tempval})
   IF (oldUserData.chatLimit-oldUserData.chatRemain)<>Val(tempval)
     self.userData.chatRemain:=self.userData.chatLimit-Val(tempval)
   ENDIF
@@ -1413,7 +1418,7 @@ PROC saveUser(userId) OF frmEditUser
     self.userMisc.accountLocked:=IF tempval=0 THEN -1 ELSE 0
   ENDIF
 
-  get(self.app.strInvalidAttempts, MUIA_Text_Contents,{tempval})
+  get(self.app.strInvalidAttempts, MUIA_String_Contents,{tempval})
   IF oldUserMisc.invalidAttempts<>Val(tempval)
     self.userMisc.invalidAttempts:=Val(tempval)
   ENDIF
@@ -1662,17 +1667,17 @@ PROC applyPreset(presetNum) OF frmEditUser
   set( self.app.cyRejoinConf,MUIA_Cycle_Active,self.calculateConfIndex(readToolTypeInt(toolTypeFile,'PRESET.CONFRJOIN'),readToolTypeInt(toolTypeFile,'PRESET.MSGBASERJOIN')))
   
   StringF(tempstring,'\d',readToolTypeInt(toolTypeFile,'PRESET.DAILY_BYTE_LIMIT'))
-  set( self.app.strByteLimit, MUIA_Text_Contents,tempstring)
+  set( self.app.strByteLimit, MUIA_String_Contents,tempstring)
   
   ratioType:=readToolTypeInt(toolTypeFile,'PRESET.RATIO_TYPE')
   set( self.app.cyRatioType, MUIA_Cycle_Active,ratioType)
 
   ratio:=readToolTypeInt(toolTypeFile,'PRESET.RATIO')
   StringF(tempstring,'\d',ratio)
-  set( self.app.strRatio, MUIA_Text_Contents,tempstring)
+  set( self.app.strRatio, MUIA_String_Contents,tempstring)
   
   StringF(tempstring,'\d',readToolTypeInt(toolTypeFile,'PRESET.TIME_LIMIT'))
-  set( self.app.strTimeLimit, MUIA_Text_Contents,tempstring)
+  set( self.app.strTimeLimit, MUIA_String_Contents,tempstring)
   
   FOR i:=0 TO self.confCount-1
     cb:=self.editedConfDbEntries+(i*SIZEOF confBase)
@@ -1681,7 +1686,7 @@ PROC applyPreset(presetNum) OF frmEditUser
     cb.ratioType:=ratioType
 
     StringF(tempstring,'\d',ratio)
-    set( self.app.strCbRatio, MUIA_Text_Contents,tempstring)
+    set( self.app.strCbRatio, MUIA_String_Contents,tempstring)
 
     set( self.app.cyCbRatioType, MUIA_Cycle_Active,ratioType)
 
@@ -1690,7 +1695,7 @@ ENDPROC
 
 PROC setupStrControlChangeNotify(control) OF frmEditUser
   domethod( control , [
-    MUIM_Notify , MUIA_Text_Contents, MUIV_EveryTime,
+    MUIM_Notify , MUIA_String_Contents, MUIV_EveryTime,
     control,
     3,
     MUIM_CallHook , self.controlChangeHook , self ] )
@@ -1758,7 +1763,7 @@ PROC setupControlChangeNotify() OF frmEditUser
 ENDPROC
 
 PROC clearStrControlChangeNotify(control) OF frmEditUser
-  domethod(control,[MUIM_KillNotify,MUIA_Text_Contents])
+  domethod(control,[MUIM_KillNotify,MUIA_String_Contents])
 ENDPROC
 
 PROC clearCycleControlChangeNotify(control) OF frmEditUser
