@@ -8,13 +8,13 @@ PROC getBuildDateString(buildString:PTR TO CHAR)
   DEF timestr[10]:STRING
 
   DateStamp(dt.stamp)
-  dt.format:=FORMAT_USA
+  dt.format:=FORMAT_CDN
   dt.flags:=0
   dt.strday:=0
   dt.strdate:=datestr
   dt.strtime:=timestr
   IF DateToStr(dt)
-    StringF(buildString,'\s[2]\s[2]\s[2]\s[2]\s[2]\s[2]\s[2]',IF dt.stamp.days>=8035 THEN '20' ELSE '19',datestr+6,datestr,datestr+3,timestr,timestr+3,timestr+6)
+    StringF(buildString,'\s[2]\s[2]\s[2]\s[2]\s[2]\s[2]\s[2]',IF dt.stamp.days>=8035 THEN '20' ELSE '19',datestr+6,datestr+3,datestr,timestr,timestr+3,timestr+6)
     RETURN TRUE
   ENDIF
   StrCopy(buildString,'')
