@@ -3385,7 +3385,7 @@ PROC startProcess(exestring, stacksize, priority, async, doorTrap)
     SetTaskPri(task,cmds.taskPri)
   ENDIF
 
-  IF doorTrap
+  IF doorTrap AND (async=FALSE)
     Close(doorTrapFH)
   ENDIF
 
@@ -4287,6 +4287,131 @@ PROC processXimMsg(msgcmd,msg:PTR TO jhMessage,tooltype,command,privcmd,params,n
     ENDSELECT
 ENDPROC
 
+PROC runCliDoor(doorExe:PTR TO CHAR, stacksize, priority) HANDLE
+  DEF fifoName[255]:STRING
+  DEF fifoMast1[255]:STRING
+  DEF fifoMast2[255]:STRING
+  DEF fifoR=NIL
+  DEF fifoW=NIL
+
+  DEF done=0
+  DEF msg:PTR TO mn
+  DEF n,ch
+  DEF bufptr:PTR TO CHAR
+  DEF temp[255]:STRING
+  DEF tags:PTR TO LONG
+  DEF fih1,fih2
+
+  runFifoHandler()
+
+  StringF(fifoName,'axdoor\d',node)
+
+  StringF(fifoMast1, '\s1_m', fifoName)   //bbs write
+  StringF(fifoMast2, '\s2_s', fifoName)   //door write
+
+  fifobase:=OpenLibrary('fifo.library', 0)
+  IF (fifobase=NIL)
+    aePuts('unable to open fifo.library\n')
+    callersLog('\tunable to open fifo.library\n')
+    RETURN RESULT_FAILURE
+  ENDIF
+
+  fifoW:=OpenFifo(fifoMast1, 2048, FIFOF_WRITE OR FIFOF_NORMAL OR FIFOF_NBIO)
+  IF (fifoW = NIL)
+    aePuts('unable to open fifo master\n')
+    callersLog('\tunable to open fifo master\n')
+    Raise(ERR_EXCEPT)
+  ENDIF
+
+  fifoR:=OpenFifo(fifoMast2, 2048, FIFOF_READ  OR FIFOF_NORMAL OR FIFOF_NBIO)
+  IF (fifoR = NIL)
+    aePuts('unable to open fifo slave\n')
+    callersLog('\tunable to open fifo slave\n')
+    Raise(ERR_EXCEPT)
+  ENDIF
+
+  IF(findAssign('fifo:')<>0)
+    aePuts('unable to find fifo: device\n')
+    callersLog('\tunable to find fifo: device\n')
+    Raise(ERR_EXCEPT)
+  ENDIF
+
+  StringF(temp,'fifo:\s2/weks',fifoName)
+  fih1:=Open(temp,MODE_READWRITE)
+  StringF(temp,'fifo:\s1/rk',fifoName)
+  fih2:=Open(temp,MODE_READWRITE) 
+
+  tags:=NEW [SYS_ASYNCH,1,SYS_INPUT,fih2,SYS_OUTPUT,fih1,NP_STACKSIZE,stacksize,NP_PRIORITY,priority,TAG_DONE]
+  SystemTagList(doorExe,tags)
+  FastDisposeList(tags)
+
+  conCursorOn()
+  aePuts('\b\n')
+
+  WHILE (done=FALSE)
+    Delay(1)
+    IF ((n:=ReadFifo(fifoR, {bufptr}, 0)) > 0)
+      aePuts2(bufptr, n)
+      n:=ReadFifo(fifoR, {bufptr}, n)
+    ENDIF
+
+    IF (n < 0)            //EOF
+      done:=TRUE
+    ENDIF
+  
+    IF done=0
+      IF(sCheckInput())
+        ch:=readChar(INPUT_TIMEOUT,0,TRUE)
+
+        IF (ch<0) OR (reqState<>REQ_STATE_NONE)
+          ->timeout or kill signal
+          done:=TRUE
+        ENDIF
+
+        IF (done=0) AND (ch<>0)
+          ->incoming message from console read
+          SELECT ch
+            CASE 3
+              sendBreak('axdoor',"C")
+            CASE 4
+              sendBreak('axdoor',"D")
+            CASE 5
+              sendBreak('axdoor',"E")
+            CASE 6
+              sendBreak('axdoor',"F")
+            DEFAULT
+              StrCopy(temp,'#')
+              temp[0]:=ch
+              n:=WriteFifo(fifoW, temp, 1)
+          ENDSELECT
+        ENDIF
+      ENDIF
+    ENDIF
+  ENDWHILE
+
+  //async systamtaglist calls automatically close their handles
+  //Close(fih1)
+  //Close(fih2)
+  conCursorOff()
+
+  IF (fifoR) THEN CloseFifo(fifoR, FIFOF_EOF)
+
+  /*  no FIFOF_EOF on IDCMP_CLOSEWINDOW to conform to documentation */
+  IF (fifoW) THEN   CloseFifo(fifoW, FIFOF_EOF)
+
+  IF (fifobase) THEN CloseLibrary(fifobase)
+
+EXCEPT
+  IF (fifoR) THEN CloseFifo(fifoR, FIFOF_EOF)
+
+  /*  no FIFOF_EOF on IDCMP_CLOSEWINDOW to conform to documentation */
+  IF (fifoW) THEN   CloseFifo(fifoW, FIFOF_EOF)
+
+  IF (fifobase) THEN CloseLibrary(fifobase)
+
+  RETURN RESULT_FAILURE
+ENDPROC RESULT_SUCCESS
+
 PROC runDoor(cmd,type,command,tooltype,params,resident,doorTrap,privcmd,pri=0,stacksize=20000)
   DEF doorPort[12]:STRING
   DEF mp: PTR TO mp
@@ -4303,11 +4428,13 @@ PROC runDoor(cmd,type,command,tooltype,params,resident,doorTrap,privcmd,pri=0,st
   DEF exit=0
   DEF alreadyActive=FALSE
   DEF oldViewSafe
+  DEF oldRawArrow
 
   StringF(tempstring,'run door: \s',cmd)
   debugLog(LOG_DEBUG,tempstring)
   aePuts('[0m')
 
+  oldRawArrow:=rawArrow
   IF serShared=FALSE THEN purgeLine()
 
   StrCopy(runOnExit,'')
@@ -4335,6 +4462,8 @@ PROC runDoor(cmd,type,command,tooltype,params,resident,doorTrap,privcmd,pri=0,st
         StringF(exestring,'\sUtils/REXXDOOR \d \s',cmds.bbsLoc,node,cmd)
       ENDIF
     CASE DOORTYPE_XIM
+      StringF(exestring,'\s \d',cmd,node)
+    CASE DOORTYPE_CLI
       StringF(exestring,'\s \d',cmd,node)
     CASE DOORTYPE_SIM
       StringF(exestring,'\s \d',cmd,node)
@@ -4392,7 +4521,9 @@ PROC runDoor(cmd,type,command,tooltype,params,resident,doorTrap,privcmd,pri=0,st
 
   IF type=DOORTYPE_SUP THEN purgeLineEnd()
 
-  temp:=startProcess(exestring,stacksize,pri,async,doorTrap)
+  IF type<>DOORTYPE_CLI
+    temp:=startProcess(exestring,stacksize,pri,async,doorTrap)
+  ENDIF
 
   IF type=DOORTYPE_SUP THEN purgeLineStart()
 
@@ -4408,7 +4539,9 @@ PROC runDoor(cmd,type,command,tooltype,params,resident,doorTrap,privcmd,pri=0,st
     RETURN
   ENDIF
 
-  IF type=DOORTYPE_XIM
+  IF type=DOORTYPE_CLI
+    runCliDoor(exestring,stacksize,pri)
+  ELSEIF type=DOORTYPE_XIM
     WHILE(exit=FALSE)
       signals:=Wait(ximSig)
       WHILE(msg:=GetMsg(mp))
@@ -4600,6 +4733,7 @@ PROC runDoor(cmd,type,command,tooltype,params,resident,doorTrap,privcmd,pri=0,st
   IF (EstrLen(runOnExit2)>0)
     processCommand(runOnExit2)
   ENDIF
+  rawArrow:=oldRawArrow
 ENDPROC
 
 PROC doorMsgLoadAccount(doorMsg: PTR TO jhMessage)
@@ -4752,6 +4886,8 @@ PROC runCommand(cmdtype,cmd,params,privcmd,subtype=-1)
     commandTypeCode:=DOORTYPE_MCI
   ELSEIF checkToolType(tooltype,cmd,'TYPE','AEM')
     commandTypeCode:=DOORTYPE_AEM
+  ELSEIF checkToolType(tooltype,cmd,'TYPE','CLI')
+    commandTypeCode:=DOORTYPE_CLI
   ELSEIF checkToolType(tooltype,cmd,'TYPE','SUP')
     commandTypeCode:=DOORTYPE_SUP
   ENDIF
@@ -5237,7 +5373,7 @@ PROC readChar(timeout, extsig = 0, raw=FALSE, raw2=FALSE)
   ENDIF
 ENDPROC ch
 
-PROC checkForPause()
+PROC checkForPause(allowBack=FALSE)
   DEF linelen
   DEF input[3]:STRING
 
@@ -5249,8 +5385,14 @@ PROC checkForPause()
   IF(nonStopDisplayFlag=FALSE) THEN lineCount++
   IF((nonStopDisplayFlag=FALSE) AND (lineCount>=linelen))
     lineCount:=0
-    aePuts('(Pause)...More(y/n/ns)? ')
+    IF allowBack
+      aePuts('[32m([33mPause[32m)[34m...[36mMore[32m([33mY[32m/[33mn[32m/[33mb[32m/[33mns[32m)[0m? ')
+    ELSE
+      aePuts('[32m([33mPause[32m)[34m...[36mMore[32m([33mY[32m/[33mn[32m/[33mns[32m)[0m? ')
+    ENDIF
     lineInput('','',3,INPUT_TIMEOUT,input)
+
+    IF (allowBack=TRUE) AND (((input[0]="B") OR (input[0]="b"))) THEN RETURN RESULT_BACK
 
     IF((input[0]="N") OR (input[0]="n"))
       IF((input[1]="S") OR (input[1]="s")) THEN nonStopDisplayFlag:=TRUE ELSE RETURN RESULT_FAILURE
@@ -6132,7 +6274,7 @@ PROC chat()
 
   runSysCommand('CHATIN','')
   StrCopy(chatfile,'')
-  IF (loggedOnUser.screenType<screenTypeExt.count())
+  IF (loggedOnUser<>NIL) ANDALSO (loggedOnUser.screenType<screenTypeExt.count())
     StringF(chatfile,'\sNode\d/StartChat.\s',cmds.bbsLoc,node,screenTypeExt.item(loggedOnUser.screenType))
     IF fileExists(chatfile)=FALSE THEN StrCopy(chatfile,'')
   ENDIF
@@ -6179,11 +6321,13 @@ next:
       JUMP chatbrk
     ENDIF
 
-    updateTimeUsed()
-    checkTimeUsed()
-    IF (loggedOnUser.chatLimit<>0) AND (loggedOnUser.chatRemain<=0)  AND (checkSecurity(ACS_OVERRIDE_CHATLIMIT)=FALSE)
-      chatFlag:=0
-      JUMP chatbrk
+    IF loggedOnUser<>NIL
+      updateTimeUsed()
+      checkTimeUsed()
+      IF (loggedOnUser.chatLimit<>0) AND (loggedOnUser.chatRemain<=0)  AND (checkSecurity(ACS_OVERRIDE_CHATLIMIT)=FALSE)
+        chatFlag:=0
+        JUMP chatbrk
+      ENDIF
     ENDIF
 
     IF(c=13)
@@ -6288,7 +6432,7 @@ chatbrk:
   IF(ansiColour)    THEN aePuts('[0m')
 
   StrCopy(chatfile,'')
-  IF (loggedOnUser.screenType<screenTypeExt.count())
+  IF (loggedOnUser<>NIL) ANDALSO (loggedOnUser.screenType<screenTypeExt.count())
     StringF(chatfile,'\sNode\d/EndChat.\s',cmds.bbsLoc,node,screenTypeExt.item(loggedOnUser.screenType))
     IF fileExists(chatfile)=FALSE THEN StrCopy(chatfile,'')
   ENDIF
@@ -7750,6 +7894,7 @@ PROC processInputMessage(timeout, extsig = 0,conRawMode=FALSE, allowSer=TRUE, se
       loggedOnUserKeys:=NEW loggedOnUserKeys
       loggedOnUserMisc:=NEW loggedOnUserMisc
       loadAccount(1,loggedOnUser,loggedOnUserKeys,loggedOnUserMisc)
+      updateLineLen()
       masterLoadPointers(loggedOnUser)
       setEnvStat(ENV_SYSOP)
       conferenceMaintenance()
@@ -7808,6 +7953,7 @@ PROC processInputMessage(timeout, extsig = 0,conRawMode=FALSE, allowSer=TRUE, se
       loggedOnUserMisc:=NEW loggedOnUserMisc
       acsLevel:=255
       loadAccount(1,loggedOnUser,loggedOnUserKeys,loggedOnUserMisc)
+      updateLineLen()
       masterLoadPointers(loggedOnUser)
       editAccounts(FALSE)
       acsLevel:=-1
@@ -7845,6 +7991,7 @@ PROC processInputMessage(timeout, extsig = 0,conRawMode=FALSE, allowSer=TRUE, se
       loggedOnUserMisc:=NEW loggedOnUserMisc
       setEnvStat(ENV_SYSOP)
       loadAccount(1,loggedOnUser,loggedOnUserKeys,loggedOnUserMisc)
+      updateLineLen()
       masterLoadPointers(loggedOnUser)
       displayCallersLog(temp,FALSE)
       END loggedOnUser
@@ -9504,7 +9651,146 @@ EXCEPT
 ENDPROC RESULT_SUCCESS
 
 PROC displayCallersLog(filename: PTR TO CHAR,tf)
+  DEF stat,stat2,lnlp=0,readSize,currentPos,displayPos
+  DEF buf:PTR TO CHAR
+  DEF fh
+  DEF memsize=4096
+  DEF tempstr[255]:STRING
+  DEF count,c
+  DEF pageInfo:PTR TO stdlist
 
+  readSize:=memsize
+  lineCount:=0
+  nonStopDisplayFlag:=FALSE
+  IF(tf) THEN nonStopDisplayFlag:=TRUE
+
+  NEW pageInfo.stdlist(25)
+
+  IF(buf:=NewR(memsize+4))<>0
+    IF(fh:=Open(filename,MODE_OLDFILE))<>0
+      Seek(fh,0,OFFSET_END)
+      displayPos:=0
+      currentPos:=Seek(fh,0,OFFSET_CURRENT)
+      REPEAT
+        IF displayPos<=0
+          IF displayPos=0
+            IF(currentPos<memsize)
+              readSize:=currentPos+lnlp
+              currentPos:=0
+            ELSE
+              currentPos:=(currentPos-4096)+lnlp
+            ENDIF
+          ENDIF
+          IF pageInfo.count()=0
+            pageInfo.add(readSize)
+            pageInfo.add(currentPos)
+          ENDIF
+          stat:=Seek(fh,currentPos,OFFSET_BEGINNING)
+          IF(stat>=0)
+            IF((stat:=Fread(fh,buf,1,readSize)))>0
+              buf[readSize-1]:=0
+            ENDIF
+          ENDIF
+          IF displayPos<0
+            displayPos:=-displayPos
+            buf[displayPos]:=0
+          ELSE
+            displayPos:=readSize
+          ENDIF
+          
+          IF pageInfo.count()=2
+            pageInfo.add(displayPos)
+          ENDIF
+        ENDIF
+        IF(buf[displayPos]="\n")
+          StringF(tempstr,'\s\s\b\n',buf+displayPos+1, IF ansiColour THEN '[0m' ELSE '')
+          
+          ->bit of a hack to the lineCount to try and take account of long log lines that wrap around
+          ->usually log lines start with a tab so anything over 72 characters would probably wrap around
+          count:=StrLen(buf+displayPos+1)
+          IF count>72
+            lineCount:=lineCount+(Div(count-72,80))+1
+          ENDIF
+          aePuts(tempstr)
+          buf[displayPos]:=0
+          lnlp:=displayPos+1
+          IF(stat2:=checkForPause(TRUE))<>0
+            IF stat2=RESULT_BACK
+              IF (c:=pageInfo.count())>5
+                IF currentPos<>pageInfo.item(c-5)
+                  readSize:=pageInfo.item(c-6)
+                  currentPos:=pageInfo.item(c-5)
+                  displayPos:=-pageInfo.item(c-4)
+                ELSE
+                  displayPos:=-pageInfo.item(c-4)
+                ENDIF
+                pageInfo.remove(c-1)
+                pageInfo.remove(c-1)
+                pageInfo.remove(c-1)
+                pageInfo.remove(c-1)
+                pageInfo.remove(c-1)
+                pageInfo.remove(c-1)
+              ELSE
+                IF currentPos<>pageInfo.item(c-2)
+                  readSize:=pageInfo.item(c-3)
+                  currentPos:=pageInfo.item(c-2)
+                  displayPos:=-pageInfo.item(c-1)
+                ELSE
+                  displayPos:=-pageInfo.item(c-1)
+                ENDIF
+                pageInfo.remove(c-1)
+                pageInfo.remove(c-1)
+                pageInfo.remove(c-1)
+              ENDIF
+            ELSE
+              aePuts('\b\n')
+              displayPos:=0;
+              stat:=(-1)
+            ENDIF
+          ENDIF
+          IF (lineCount=0)
+            pageInfo.add(readSize)
+            pageInfo.add(currentPos)
+            pageInfo.add(Abs(displayPos))
+          ENDIF
+          IF(sCheckInput())
+            stat2:=readChar(1)
+            IF(stat2<0)
+                displayPos:=0;
+                stat:=(-1);
+            ELSE
+              SELECT stat2
+                CASE 19 /* Pause */
+                  stat:=readChar(INPUT_TIMEOUT)
+                  IF(stat2<0)
+                    displayPos:=0
+                    stat:=(-1)
+                  ENDIF
+                CASE 3 /* ^C */
+                  aePuts('**Break\b\n\b\n')
+                  IF(ansiColour) THEN aePuts('[0m')
+                  displayPos:=0
+                  stat:=(-1);
+              ENDSELECT
+            ENDIF
+          ENDIF
+        ELSE
+          displayPos--
+        ENDIF
+      
+      UNTIL (currentPos<=0) OR (stat<0)
+      Close(fh)
+    ELSE
+      aePuts('\b\nNot a valid node!\b\n\b\n')
+    ENDIF
+
+    Dispose(buf)
+  ENDIF
+  END pageInfo
+
+ENDPROC
+
+/*PROC displayCallersLog(filename: PTR TO CHAR,tf)
   DEF stat,stat2,loop,lnlp=0,readSize,currentPos
   DEF buf:PTR TO CHAR
   DEF fh
@@ -9594,7 +9880,7 @@ PROC displayCallersLog(filename: PTR TO CHAR,tf)
 
     Dispose(buf)
   ENDIF
-ENDPROC
+ENDPROC*/
 
 PROC debugLog(logType,logline:PTR TO CHAR)
   DEF buff[255]:STRING
@@ -9644,6 +9930,7 @@ PROC runFifoHandler()
   Permit()
   IF found=FALSE THEN Execute('Run >NIL: <NIL: l:fifo-handler',0,0)
 ENDPROC
+
 
 PROC remoteShell() HANDLE
   DEF rMsg:mn
@@ -9757,13 +10044,13 @@ PROC remoteShell() HANDLE
         ->incoming message from console read
         SELECT ch
           CASE 3
-            sendBreak("C")
+            sendBreak('bbsshell',"C")
           CASE 4
-            sendBreak("D")
+            sendBreak('bbsshell',"D")
           CASE 5
-            sendBreak("E")
+            sendBreak('bbsshell',"E")
           CASE 6
-            sendBreak("F")
+            sendBreak('bbsshell',"F")
           DEFAULT
             StrCopy(temp,'#')
             temp[0]:=ch
@@ -9820,11 +10107,11 @@ PROC waitMsg(msg:PTR TO mn)
   Permit()
 ENDPROC
 
-PROC sendBreak(c)
+PROC sendBreak(fifoname,c)
   DEF buf[256]:STRING
   DEF fh
 
-  StringF(buf, 'FIFO:bbsshell\d/\c', node, c)
+  StringF(buf, 'FIFO:\s\d/\c', fifoname,node, c)
   IF ((fh:=Open(buf, 1005))) THEN Close(fh)
 ENDPROC
 
@@ -28420,7 +28707,7 @@ PROC displayFileList(params, reverse=FALSE)
       StrAdd(str,'hold/held')
       aePuts('Scanning directory HOLD\b\n')
     ENDIF
-    stat:=flagPause(1)
+    stat:=flagPause(1,TRUE)
     IF(stat<0)
       IF(fcopy) THEN DeleteFile(tempfile)  ->(RTS)
       RETURN stat
@@ -28465,8 +28752,12 @@ PROC displayIt(fname: PTR TO CHAR)
 ENDPROC res
 
 PROC displayIt2(fp)
-  DEF moreStat,stat,color = 0
+  DEF moreStat,stat,color = 0,c
   DEF str[200]:STRING
+  DEF pageInfo:PTR TO stdlist
+
+  NEW pageInfo.stdlist(25)
+  pageInfo.add(Seek(fp,0,OFFSET_CURRENT))
 
   WHILE(Fgets(fp,str,180)<>NIL)
     str[181]:=0
@@ -28482,28 +28773,45 @@ PROC displayIt2(fp)
     IF(sCheckInput())
       stat:=readChar(1)
       IF(stat<0)
+        END pageInfo
         RETURN stat
       ENDIF
       SELECT stat
         CASE 23  /* Pause */
           stat:=readChar(INPUT_TIMEOUT)
           IF(stat<0)
+            END pageInfo
             RETURN RESULT_NO_CARRIER
           ENDIF
         CASE 3 /* ^C */
           aePuts('**Break\b\n\b\n')
+          END pageInfo
           RETURN RESULT_FAILURE
       ENDSELECT
     ENDIF
     IF newFilesPauseFlag
-      moreStat:=checkForPause()
+      moreStat:=checkForPause(TRUE)
     ELSE
-      moreStat:=flagPause(0)
+      moreStat:=flagPause(0,TRUE)
     ENDIF
+    IF moreStat=RESULT_BACK
+      c:=pageInfo.count()
+      IF c>1 
+        pageInfo.remove(c-1)
+        c--
+      ENDIF
+
+      Seek(fp,pageInfo.item(c-1),OFFSET_BEGINNING)
+      pageInfo.remove(c-1)
+    ENDIF
+    IF (lineCount=0) THEN pageInfo.add(Seek(fp,0,OFFSET_CURRENT))
     IF(moreStat<0)
+      END pageInfo
       RETURN moreStat
     ENDIF
   ENDWHILE
+  END pageInfo
+
 ENDPROC RESULT_SUCCESS
 
 PROC displayIt3(buffer:PTR TO CHAR)
@@ -28726,9 +29034,9 @@ fgetnext:
       aePuts(c)
       aePuts('\b\n')
       IF newFilesPauseFlag
-        stat:=checkForPause()
+        stat:=checkForPause(TRUE)
       ELSE
-        stat:=flagPause(1)
+        stat:=flagPause(1,TRUE)
       ENDIF
       IF(stat<0)
         Close(fp1)
@@ -28755,8 +29063,8 @@ fgetnext:
   IF(fcopy) THEN DeleteFile(tempfile)
 ENDPROC RESULT_SUCCESS
 
-PROC flagPause(count)
-  DEF moreStat
+PROC flagPause(count,allowBack=FALSE)
+  DEF moreStat,res
   DEF str[200]:STRING
 
   IF(nonStopDisplayFlag=FALSE) THEN lineCount:=lineCount+count
@@ -28764,11 +29072,20 @@ PROC flagPause(count)
   IF((nonStopDisplayFlag=FALSE) AND (lineCount>=userLineLen))
     lineCount:=0;
     LOOP
-      aePuts('[32m([33mPause[32m)[34m...[32m([33mf[32m)[36mlags, More[32m([33mY[32m/[33mn[32m/[33mns[32m)[0m? ')
+      IF allowBack
+        aePuts('[32m([33mPause[32m)[34m...[32m([33mf[32m)[36mlags, More[32m([33mY[32m/[33mn[32m/[33mb[32m/[33mns[32m)[0m? ')
+      ELSE
+        aePuts('[32m([33mPause[32m)[34m...[32m([33mf[32m)[36mlags, More[32m([33mY[32m/[33mn[32m/[33mns[32m)[0m? ')
+      ENDIF
       moreStat:=lineInput('','',190,INPUT_TIMEOUT,str)
       IF(moreStat<0) THEN RETURN moreStat
 
+      moreStat:=RESULT_SUCCESS
       EXIT (str[0]=0) OR (str[0]="y") OR (str[0]="Y")
+
+      
+      moreStat:=RESULT_BACK
+      EXIT allowBack AND ((str[0]="b") OR (str[0]="B"))
 
       IF(logonType>=LOGON_TYPE_REMOTE)
         moreStat:=checkCarrier()
@@ -28793,7 +29110,7 @@ PROC flagPause(count)
 fpbrk:
     aePuts('[1A[K')
   ENDIF
-ENDPROC RESULT_SUCCESS
+ENDPROC moreStat
 
 
 PROC confScan()
